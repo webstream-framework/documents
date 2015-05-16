@@ -79,6 +79,79 @@ class BlogService extends CoreService {
 Serviceクラス内の`$this->{ページ名}`オブジェクトにはModelクラスのインスタンスが格納されています。ModelクラスにアクセスしてDB処理を実行します。
 また、ServiceクラスにはContoller、Service、Model、Helperの各クラスに属さないユーザ定義クラスへのパスが通っています。`app/libraries/`ディレクトリに任意のクラスを定義することでServiceクラスからアクセスできます。例えば、外部APIにアクセスするクラスや、データをバインドするEntityクラスなど特定用途のクラスはlibrariesに定義してください。
 
+Serviceクラスは、Viewから参照されるデータを格納する**ViewModel**の機能を内包しています。
+Viewから参照するデータはServiceクラスのGetterメソッドを経由して参照することになりますが、データ量が多くなる場合、Getterメソッドとそれに使うプロパティが増えていきます。
+これらはServiceの機能とは本質的には無関係な定義であるにもかかわらず、コード量として多くなってしまうため、Serviceでは`PropertyProxy`という機能を使い、簡単にViewModelを使えるようにしています。
+Serviceクラスの中で、未定義のプロパティに値をセットすると、PropertyProxyにより、Serviceクラス内で値が保持されます。保持されたデータはViewから参照可能になります。
+これにより、Viewから参照するデータをGetterメソッドなしで参照でき、カプセル化した状態で値を保持することができます。
+
+
+**PropertyProxyを使わない場合**
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreService;
+
+// PropertyProxyなしの場合、Getterメソッドが必要
+class BlogService extends CoreService {
+    // プロパティはpublicにすべきではない
+    private $title;
+
+    public function getTitle()
+    {
+        // ViewからはpublicなGetterメソッドでなければ参照不可
+        return $this->title;
+    }
+
+    public funciton entry() {
+        $this->title = "マイブログ";
+    }
+}
+```
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <head>
+        <title>%H{$model->getTitle()}</title>
+    </head>
+    <body>
+    </body>
+</html>
+```
+
+**PropertyProxyを使った場合**
+
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreService;
+
+// PropertyProxy使用の場合、Getterメソッドは不要
+class BlogService extends CoreService {
+    public funciton entry() {
+        $this->title = "マイブログ";
+    }
+}
+```
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <head>
+        <title>%H{$model->title}</title>
+    </head>
+    <body>
+    </body>
+</html>
+```
+
+なお、定義済みのプロパティにセットした場合は、PropertyProxyは使われません。
+また、この機能はModelでも有効ですが、Serviceクラスを作る必要のない簡単な処理の場合以外はServiceクラスのViewModel機能を使うことを推奨します。
 
 ##[Model](#model)
 ModelクラスはControllerクラス、ServiceクラスまたはViewクラスからのリクエストや受け取ったデータを元にデータベースに問い合わせます。
@@ -345,24 +418,9 @@ class BlogController extends CoreController {
 }
 ```
 
-BasicテンプレートとTwigテンプレートの違いは、Basicテンプレートではテンプレートキャッシュ機能とCSRF対策トークン自動挿入機能がつきます。
-テンプレートキャッシュ機能は、出力した内容をまるごとキャッシュする機能で、`cacheTime`属性で指定した時間(秒)だけキャッシュします。CSRF対策トークン機能は、formタグが使用された場合自動的にCSRF対策が有効になる機能です。
-
-```php
-namespace MyBlog;
-use WebStream\Core\CoreController;
-
-/**
- * テンプレートキャッシュを600秒有効にする
- * @Inject
- * @Template("index.tmpl", engine="basic", cacheTime=600)
- */
-class BlogController extends CoreController {
-    public funciton execute() {
-        $this->Blog->entry();
-    }
-}
-```
+Basicテンプレートにはテンプレートキャッシュ機能とCSRF対策トークン自動挿入機能がつきます。この機能により、CSRF対策が自動的に有効になります。
+Basicテンプレートを指定している場合に`<form>`タグが含まれる場合、CSRF対策トークンが自動挿入されます。
+(ただし、method="get"の場合は有効になりません。)
 
 ```html
 <head>
@@ -370,13 +428,49 @@ class BlogController extends CoreController {
 <title>CSRF CHECK</title>
 </head>
 <body>
-<form action="/" method="post">
+<form action="/form_register" method="post">
     <input type="button" value="submit">
     <input type="hidden" name="__CSRF_TOKEN__" value="a2891f68edeb487a9140edf8575a8e3382f96c0d">
 </form>
 </body>
 ```
 
+フォームの送り先のControllerクラスで`@CsrfProtection`アノテーションを指定すると、CSRFチェック処理が実行されます。
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreController;
+
+class BlogController extends CoreController {
+    /**
+     * @Inject
+     * @CsrfProtection
+     */
+    public funciton formRegister() {
+        // CSRFエラーがあった場合、例外が発生し、ここには到達しない
+    }
+}
+```
+
+CSRF対策トークンの送信はPOSTで通常行いますが、HTTPヘッダ`X-CSRF-Token`にトークン文字列を指定して送信することも可能です。
+
+テンプレートキャッシュ機能は、出力した内容をまるごとキャッシュする機能で、`cacheTime`属性で指定した時間(秒)だけキャッシュします。
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreController;
+
+class BlogController extends CoreController {
+    /**
+     * テンプレートキャッシュを600秒有効にする例
+     * @Inject
+     * @Template("index.tmpl", engine="basic", cacheTime=600)
+     */
+    public funciton execute() {
+        $this->Blog->entry();
+    }
+}
+```
 
 Viewテンプレートでは以下の構文が使用可能です。
 
@@ -445,7 +539,7 @@ Helper    |SampleHelper    |app/helpers/SampleHelper.php
 
 ##[ルーティング定義](#routing)
 ###routes.php
-ルーティング設定により、URI設計を行うことができます。ルーティングにはmod_rewiteが必要です。  
+ルーティング設定により、URI設計を行うことができます。ルーティングにはmod_rewiteが必要です。
 ルーティング定義は`config/routes.php`に記述します。  
 
 ```php
@@ -471,24 +565,25 @@ class BlogController extends CoreController {
 }
 ```
 
-##バリデーション定義
-
-###validates.php
-バリデーション設定により、GET/POST/PUT/DELETEリクエストに含まれるパラメータをチェックすることができます。  
-バリデーション定義は`config/validates.php`に記述します。  
+##[バリデーション定義](#validate)
+Controllerクラスのアクションメソッドに`@Validate`アノテーションを記述することでバリデーションを有効にできます。
 
 ```php
-namespace WebStream\Validator;
-Validator::setRule([
-    "sample#validateForm" => [
-        "post#name" => "required",
-        "get#page"  => "required|number"
-    ]
-]);
+namespace MyBlog;
+use WebStream\Core\CoreController;
+use WebSteram\Annotation\Validate;
+class BlogController extends CoreController {
+    /**
+     * GETリクエストのtestパラメータの指定がない場合、エラーになる例
+     * @Inject
+     * @Validate(key="test", rule="required", method="get")
+     */
+    public function execute() {
+    }
+}
 ```
 
-Validator::setRule内にバリデーション定義を記述します。
-定義は、キーにクラス#アクション、バリューにバリデーション内容を記述します。バリデーション内容もキー、バリュー形式になっており、キーにリクエストメソッド#パラメータ名、バリューにチェックルールを記述します。
+バリデーションルールは以下のものが用意されています。
 
 ####バリデーションチェックルール
 
@@ -505,7 +600,43 @@ length       |文字数一致チェック
 range[n..m]  |範囲チェック(整数)
 regexp[//]   |正規表現チェック
 
-##リクエストパラメータ
+### カスタムバリデーション
+用意されているバリデーションルール以外に、開発者が独自にルールを定義することが出来ます。
+`app`ディレクトリ配下の任意の場所にバリデーションクラスを作成します。
+
+```php
+<?php
+namespace Blog;
+use WebStream\Validate\Rule\IValidate;
+class Page implements IValidate
+{
+    public function isValid($value, $rule)
+    {
+        return $value === null || (bool) preg_match('/^[1-9]{1,}[0-9]{0,}$/', $value);
+    }
+}
+```
+
+`WebStream\Validate\Rule\IValidate`インタフェースを実装し、戻り値が`bool`型の`isValid`メソッドを実装します。
+バリデーションが成功すればtrue、失敗すればfalseを返すようにします。
+クラス名がルール名と紐付いているので、`@Validate`アノテーションに指定します。
+ただし、ルール名はクラス名をスネークケースに変換したものになります。
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreController;
+use WebSteram\Annotation\Validate;
+class BlogController extends CoreController {
+    /**
+     * @Inject
+     * @Validate(key="p", rule="page", method="get")
+     */
+    public function execute() {
+    }
+}
+```
+
+##[リクエストパラメータ](#request)
 GET/POST/PUT/DELETEで送信した値をControllerで取得できます。
 `$this->request`オブジェクトからリクエストパラメータを取得でき、`get`,`post`,`put`,`delete`メソッドにそれぞれアクセスします。
 
@@ -520,7 +651,7 @@ class BlogController extends CoreController {
 }
 ```
 
-##セッション
+##[セッション](#session)
 ログイン処理などを実装するときに、セッション管理を使用しますが、WebStreamでは`$this->session`オブジェクトを使用します。セッション期限を指定するには`restart`メソッドを使用します。
 
 ```php
@@ -543,7 +674,7 @@ ControllerとModelではアノテーションを使ってクラスやメソッ�
 クラスまたはメソッドに対するアノテーションは`@Inject`、プロパティに対するアノテーションは`@Autowired`の指定が必須です。
 
 
-アノテーション  |説明
+アノテーション|説明
 -----------|----
 @Inject    |メソッドに対するアノテーションを有効にする
 
@@ -559,6 +690,7 @@ ControllerとModelではアノテーションを使ってクラスやメソッ�
 @Header          |リクエスト/レスポンスを制御する                       |@Header(contentType="html")<br>@Header(contentType="xml")<br>@Header(allowMethod="POST")<br>@Header(allowMethod={"GET","POST"})
 @Template        |Viewテンプレートを設定する                         |@Template("index.tmpl")<br>@Template("index.tmpl",name="head" type="parts")<br>@Template("index.tmpl",name="shared",type="shared")
 @ExceptionHandler|例外を補足して別処理を実行する                     |@ExceptionHandler("\Exception")<br>@ExceptionHandler({"\RuntimeException","\LogicException"})
+@CsrfProtection  |CSRF対策処理を実行する                          |@CsrfProtection
 
 ####Modelで使用可能なアノテーション
 アノテーション |説明                                 |サンプル
