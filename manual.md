@@ -670,7 +670,22 @@ class LoginController extends CoreController {
 
 セッションがタイムアウトした場合、`SessionTimeoutException`が発生します。
 
-## <a href="annotaion">アノテーション</a>
+## [ロギング](#logging)
+Controller、Service、Model、Helperクラスではロガーを使用できます。  
+
+```php
+namespace MyBlog;
+use WebStream\Core\CoreController;
+class LoginController extends CoreController {
+    public function index() {
+        $this->logger->debug("logging in controller");
+    }
+}
+```
+
+ログレベルについては、[PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)に準拠しています。
+
+## [アノテーション](#annotation)
 ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。  
 クラスまたはメソッドに対するアノテーションは`@Inject`、プロパティに対するアノテーションは`@Autowired`の指定が必須です。
 
