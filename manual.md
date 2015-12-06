@@ -1,24 +1,24 @@
 # WebStream
-WebStreamはMVCアーキテクチャをベースとしたWebアプリケーションフレームワークです。
+WebStreamはMVCアーキテクチャをベースとしたWebアプリケーションフレームワークです。  
 さらにS(Service)層を追加した4層構造のアーキテクチャとなっています。
 
-##WebStreamのアーキテクチャ
-WebStreamはMVCを拡張したアーキテクチャを採用しており、Serviceレイヤを追加しています。
-MVCはFat Controller/Fat Model問題を引き起こしやすいアーキテクチャであるため、ビジネスロジックはServiceに定義します。
-また、View内でビジネスロジックを書く場合はHelperを利用し、Viewはレンダリングに専念させます。  
+## WebStreamのアーキテクチャ
+WebStreamはMVCを拡張したアーキテクチャを採用しており、Serviceレイヤを追加しています。  
+MVCはFat Controller/Fat Model問題を引き起こしやすいアーキテクチャであるため、ビジネスロジックはServiceに定義します。  
+また、View内でビジネスロジックを書く場合はHelperを利用し、Viewはレンダリングに専念させます。
 
 
-##[Controller](#controller)
-Contollerではクライアントからのリクエストを受け付け、ServiceまたはModelを呼び出します。
-Controllerの処理が完了したらViewを呼び出します。Viewへパラメータを渡す場合、Serviceにセットします。
-原則的にControllerにビジネスロジックを記述してはなりません。
-`app/controllers`に`WebStream\Core\CoreController`クラスを継承したクラスを定義します。  
+## [Controller](#controller)
+Contollerではクライアントからのリクエストを受け付け、ServiceまたはModelを呼び出します。  
+Controllerの処理が完了したらViewを呼び出します。Viewへパラメータを渡す場合、Serviceにセットします。  
+原則的にControllerにビジネスロジックを記述してはなりません。  
+`app/controllers`に`WebStream\Core\CoreController`クラスを継承したクラスを定義します。
 
-###Controllerクラスの定義
-Controllerクラスは`\WebStream\Core\CoreController`クラスを継承します。
+### Controllerクラスの定義
+Controllerクラスは`\WebStream\Core\CoreController`クラスを継承します。  
 ControllerクラスからはServiceクラスまたはModelクラスを参照できます。またViewテンプレートを呼び出して描画できます。
 
-####Serviceクラス、Modelクラス呼び出し
+#### Serviceクラス、Modelクラス呼び出し
 Serviceクラス、Modelクラスは以下のように呼び出します。
 
 ```php
@@ -32,11 +32,12 @@ class BlogController extends CoreController {
 }
 ```
 
-Controllerクラス内の`$this->{ページ名}`オブジェクトにはServiceクラスまたはModelクラスのインスタンスが格納されています。Serviceクラスを定義している場合はServiceクラスインスタンスが格納されます。このときのページ名はアッパーキャメルケースで指定します。
-Serviceクラスを定義せずModelクラスのみ定義した場合はModelクラスインスタンスが格納されます。Serviceクラスに特段のビジネスロジックを記述する必要がなく、DBからのデータを取り出したいだけの場合など、Controllerクラスから直接Modelクラスにアクセスすることができます。
+Controllerクラス内の`$this->{ページ名}`オブジェクトにはServiceクラスまたはModelクラスのインスタンスが格納されています。  
+Serviceクラスを定義している場合はServiceクラスインスタンスが格納されます。このときのページ名はアッパーキャメルケースで指定します。  
+Serviceクラスを定義せずModelクラスのみ定義した場合はModelクラスインスタンスが格納されます。Serviceクラスに特段のビジネスロジックを記述する必要がなく、DBからのデータを取り出したいだけの場合など、Controllerクラスから直接Modelクラスにアクセスすることができます。  
 Controllerクラスでは[アノテーション](#annotaion)を使ってメソッドやプロパティを操作できます。
 
-####Viewテンプレート呼び出し
+#### Viewテンプレート呼び出し
 HTMLを描画するにはControllerからViewテンプレートを呼び出します。Viewテンプレート呼び出しは[アノテーション](#annotaion)を利用します。
 
 ```php
@@ -55,15 +56,15 @@ class BlogController extends CoreController {
 }
 ```
 
-この処理で`@Template`に指定したテンプレートファイル`index.tmpl`を呼び出します。
+この処理で`@Template`に指定したテンプレートファイル`index.tmpl`を呼び出します。  
 テンプレートファイルは`app/views/(ページ名)/`に保存します。このときのページ名はスネークケースで指定します(詳細は[View](#view)で説明します)。
 
 
-##[Service](#service)
-ServiceクラスではContollerクラスから受け取ったリクエストやデータを使って処理をしたり、View経由でビジネスロジックを実行します。
-メインとなるビジネスロジックはServiceに記述します。データベースへの問い合わせが必要な場合はModelへ問い合わせます。
-また、Serviceでは開発者が個別に定義したクラス(ライブラリ)を利用することができます。Serviceで処理するロジックがない場合などはServiceを定義する必要はありません。
-`app/services`に`WebStream\Core\CoreService`クラスを継承したクラスを定義します。  
+## [Service](#service)
+ServiceクラスではContollerクラスから受け取ったリクエストやデータを使って処理をしたり、View経由でビジネスロジックを実行します。  
+メインとなるビジネスロジックはServiceに記述します。データベースへの問い合わせが必要な場合はModelへ問い合わせます。  
+また、Serviceでは開発者が個別に定義したクラス(ライブラリ)を利用することができます。Serviceで処理するロジックがない場合などはServiceを定義する必要はありません。  
+`app/services`に`WebStream\Core\CoreService`クラスを継承したクラスを定義します。
 
 ```php
 namespace MyBlog;
@@ -76,12 +77,12 @@ class BlogService extends CoreService {
 }
 ```
 
-Serviceクラス内の`$this->{ページ名}`オブジェクトにはModelクラスのインスタンスが格納されています。ModelクラスにアクセスしてDB処理を実行します。
+Serviceクラス内の`$this->{ページ名}`オブジェクトにはModelクラスのインスタンスが格納されています。ModelクラスにアクセスしてDB処理を実行します。  
 また、ServiceクラスにはContoller、Service、Model、Helperの各クラスに属さないユーザ定義クラスへのパスが通っています。`app/libraries/`ディレクトリに任意のクラスを定義することでServiceクラスからアクセスできます。例えば、外部APIにアクセスするクラスや、データをバインドするEntityクラスなど特定用途のクラスはlibrariesに定義してください。
 
-Serviceクラスは、Viewから参照されるデータを格納する**ViewModel**の機能を内包しています。
+Serviceクラスは、Viewから参照されるデータを格納する**ViewModel**の機能を内包しています。  
 Viewから参照するデータはServiceクラスのGetterメソッドを経由して参照することになりますが、データ量が多くなる場合、Getterメソッドとそれに使うプロパティが増えていきます。
-これらはServiceの機能とは本質的には無関係な定義であるにもかかわらず、コード量として多くなってしまうため、Serviceでは`PropertyProxy`という機能を使い、簡単にViewModelを使えるようにしています。
+これらはServiceの機能とは本質的には無関係な定義であるにもかかわらず、コード量として多くなってしまうため、Serviceでは`PropertyProxy`という機能を使い、簡単にViewModelを使えるようにしています。  
 Serviceクラスの中で、未定義のプロパティに値をセットすると、PropertyProxyにより、Serviceクラス内で値が保持されます。保持されたデータはViewから参照可能になります。
 これにより、Viewから参照するデータをGetterメソッドなしで参照でき、カプセル化した状態で値を保持することができます。
 
@@ -150,13 +151,13 @@ class BlogService extends CoreService {
 </html>
 ```
 
-なお、定義済みのプロパティにセットした場合は、PropertyProxyは使われません。
+なお、定義済みのプロパティにセットした場合は、PropertyProxyは使われません。  
 また、この機能はModelでも有効ですが、Serviceクラスを作る必要のない簡単な処理の場合以外はServiceクラスのViewModel機能を使うことを推奨します。
 
-##[Model](#model)
-ModelクラスはControllerクラス、ServiceクラスまたはViewクラスからのリクエストや受け取ったデータを元にデータベースに問い合わせます。
-Serviceクラスが定義されない場合はController、Viewから直接呼び出されます。Modelにはデータベース問い合わせ処理を記述します。
-`app/models`に`WebStream\Core\CoreModel`クラスを継承したクラスを定義します。  
+## [Model](#model)
+ModelクラスはControllerクラス、ServiceクラスまたはViewクラスからのリクエストや受け取ったデータを元にデータベースに問い合わせます。  
+Serviceクラスが定義されない場合はController、Viewから直接呼び出されます。Modelにはデータベース問い合わせ処理を記述します。  
+`app/models`に`WebStream\Core\CoreModel`クラスを継承したクラスを定義します。
 
 ```php
 namespace MyBlog;
@@ -195,7 +196,7 @@ class BlogModel extends CoreModel {
 
 Modelクラスでは以下のメソッドが利用可能です。
 
-####Modelで利用可能なメソッド一覧
+#### Modelで利用可能なメソッド一覧
 メソッド                                                  |内容
 -------------------------------------------------------|----
 select(string $sql)<br>select(string $sql, array $bind)|SELECTを実行する。
@@ -208,7 +209,7 @@ rollback()                                             |ロールバックする
 connect()                                              |DBに接続する。
 disconnect()                                           |DBを切断する。
 
-####クエリファイルによるSQL実行
+#### クエリファイルによるSQL実行
 Modelクラスでは直接SQLをメソッド内に記述する以外に、クエリファイル(XML)を使ってSQLを実行できます。クエリファイルは`query/`に保存します。
 
 ```xml
@@ -226,8 +227,8 @@ Modelクラスでは直接SQLをメソッド内に記述する以外に、クエ
   </select>
 </mapper>
 ```
-クエリファイルのDTDは同ディレクトリに配置し、DOCTYPEの値は適宜修正しDTDを指すようにします。
-mapperタグの`namespace`にModelクラスの名前空間を指定します。名前空間が一致すればModelクラスからクエリファイルを呼び出すことができます。
+クエリファイルのDTDは同ディレクトリに配置し、DOCTYPEの値は適宜修正しDTDを指すようにします。  
+mapperタグの`namespace`にModelクラスの名前空間を指定します。名前空間が一致すればModelクラスからクエリファイルを呼び出すことができます。  
 mapperタグ配下にSQLを記述するタグを記述します。`<select>`、`<insert>`、`<update>`、`<delete>`タグが指定可能です。タグの`id`をModelクラスのメソッドからアクセスするとSQLを実行できます。
 
 ```php
@@ -248,7 +249,7 @@ class BlogModel extends CoreModel {
     }
 }
 ```
-####クエリファイルによるSQL実行結果をエンティティクラスにマッピングする
+#### クエリファイルによるSQL実行結果をエンティティクラスにマッピングする
 クエリファイルの`<select>`タグの`entity`属性にクラスパスを設定すると、取得結果をマッピングすることができます。  
 Modelクラスでは直接SQLをメソッド内に記述する以外に、クエリファイル(XML)を使ってSQLを実行できます。クエリファイルは`query/`に保存します。
 
@@ -283,11 +284,11 @@ class BlogEntity {
 }
 ```
 
-テーブルのカラム名とエンティティクラスのフィールド名には対応関係があり、それにしたがってマッピング定義する必要があります。
-エンティティクラスのフィールド名はローワーキャメルケースで定義すると、型を含めてマッピングが実行されます。
+テーブルのカラム名とエンティティクラスのフィールド名には対応関係があり、それにしたがってマッピング定義する必要があります。  
+エンティティクラスのフィールド名はローワーキャメルケースで定義すると、型を含めてマッピングが実行されます。  
 テーブルのカラム名がスネークケースである場合、自動的に名前をローワーキャメルケースに変換した上でマッピングされます。カラム名がエンティティクラスのフィールド名にマッピングできない命名になっている場合、SQLのAS句で別名を付けて対応してください。
 
-####取得結果を配列にする
+#### 取得結果を配列にする
 `select`で取得した結果を配列に変換します。
 
 ```php
@@ -297,7 +298,7 @@ $this->select($sql, $bind)->toArray();
 $this->getData($bind)->toArray();
 ```
 
-####取得結果をエンティティにする
+#### 取得結果をエンティティにする
 `select`で取得した結果をエンティティに変換します。
 
 ```php
@@ -311,19 +312,19 @@ $this->getData($bind)->toEntity($entityClasspath);
 
 [アノテーション](#annotaion)を使い、クエリファイルパスを指定します。これによりクエリファイルに記述したSQLが自動的に紐付けられます。
 
-####トランザクション処理
-`$this->beginTransation()`でトランザクションを開始し`$this->commit()`でコミット、`$this->rollback()`でロールバックを実行します。
-ただし、DBMSがトランザクション処理に対応していない場合はトランザクション処理は有効になりません。
+#### トランザクション処理
+`$this->beginTransation()`でトランザクションを開始し`$this->commit()`でコミット、`$this->rollback()`でロールバックを実行します。  
+ただし、DBMSがトランザクション処理に対応していない場合はトランザクション処理は有効になりません。  
 なお、トランザクション処理を明示しない場合、処理が終了後、自動的にコミットを実行します。
 
-##[View](#view)
-Viewは画面に出力するHTMLなどを描画し、Controllerクラスから呼ばれます。HTML等の描画はWebStream独自のテンプレート機能を利用します。
+## [View](#view)
+Viewは画面に出力するHTMLなどを描画し、Controllerクラスから呼ばれます。HTML等の描画はWebStream独自のテンプレート機能を利用します。  
 ViewからはHelperまたはModel、Serviceを呼び出してビジネスロジックを実行することができます。
 
 ViewテンプレートはWebStream独自のBasicテンプレートとTwigテンプレートが使えます。
-Baicテンプレートファイルは`.tmpl`拡張子を、Twigテンプレートは`.twig`を付け、`app/views`にページ名をスネークケースに変換したフォルダを作成し保存します。
-`__cache`、`__public`、`__shared`フォルダを作成すると、それぞれテンプレートキャッシュファイル、静的ファイル、共通テンプレートファイルを使用することができます。
-ViewにはModel/Serviceオブジェクトが渡されるので、Model、Serviceで取得した値やビジネスロジックの実行がViewで可能になります。
+Baicテンプレートファイルは`.tmpl`拡張子を、Twigテンプレートは`.twig`を付け、`app/views`にページ名をスネークケースに変換したフォルダを作成し保存します。  
+`__cache`、`__public`、`__shared`フォルダを作成すると、それぞれテンプレートキャッシュファイル、静的ファイル、共通テンプレートファイルを使用することができます。  
+ViewにはModel/Serviceオブジェクトが渡されるので、Model、Serviceで取得した値やビジネスロジックの実行がViewで可能になります。  
 Model/Serviceオブジェクトは`$model`変数に格納されます。また、Helperオブジェクトは`$helper`変数に格納されます。
 
 ContollerクラスからViewテンプレートを呼び出します。`@Template`の仕様は[アノテーション](#annotaion)を参照してください。
@@ -344,8 +345,8 @@ class BlogController extends CoreController {
 }
 ```
 
-`__shared`に保存した共通テンプレートを呼び出すことができます。
-共通点プレートはheaderやfooterなど共通になる部分を定義するときに使用します。
+`__shared`に保存した共通テンプレートを呼び出すことができます。  
+共通点プレートはheaderやfooterなど共通になる部分を定義するときに使用します。  
 
 テンプレートを部品化したい場合、部分テンプレートとして呼び出すことができます。
 
@@ -418,8 +419,8 @@ class BlogController extends CoreController {
 }
 ```
 
-Basicテンプレートにはテンプレートキャッシュ機能とCSRF対策トークン自動挿入機能がつきます。この機能により、CSRF対策が自動的に有効になります。
-Basicテンプレートを指定している場合に`<form>`タグが含まれる場合、CSRF対策トークンが自動挿入されます。
+Basicテンプレートにはテンプレートキャッシュ機能とCSRF対策トークン自動挿入機能がつきます。この機能により、CSRF対策が自動的に有効になります。  
+Basicテンプレートを指定している場合に`<form>`タグが含まれる場合、CSRF対策トークンが自動挿入されます。  
 (ただし、method="get"の場合は有効になりません。)
 
 ```html
@@ -474,7 +475,7 @@ class BlogController extends CoreController {
 
 Viewテンプレートでは以下の構文が使用可能です。
 
-###[Viewテンプレート構文](#template_keyword)
+### [Viewテンプレート構文](#template_keyword)
 構文     |説明
 ---------|----
 %P{$hoge}|%P{}で囲ったPHPのコードを実行する。関数を実行する場合などに使用する。<br>ただし、関数の実行結果をreturnしても画面表示されない。また、関数内部で`echo`で標準出力した場合はエスケープされないので注意。<br>実行結果を伴わない関数の実行が必要な場合に使用する。
@@ -483,8 +484,8 @@ Viewテンプレートでは以下の構文が使用可能です。
 %X{$hoge}|%X{}で囲った変数を安全な値にエスケープしてXMLとして評価する。関数を実行する場合も使用可能で、returnで返却された結果をエスケープして画面表示する。<br>ただし、関数内部で`echo`で標準出力した場合はエスケープされないので注意。
 %T{$template}|%T{}で囲ったテンプレートパスを読み込む。
 
-##[Helper](#helper)
-Viewの描画に関するロジックが必要な場合はHelperを呼び出します。
+## [Helper](#helper)
+Viewの描画に関するロジックが必要な場合はHelperを呼び出します。  
 Helperクラスは`app/helpers`に`WebStream\Core\CoreHelper`クラスを継承したクラスを定義します。
 
 ```php
@@ -502,14 +503,14 @@ class TestHelperHelper extends CoreHelper
 }
 ```
 
-Helperクラス内ではViewテンプレート内と同様に`$model`オブジェクトからModelクラス、Serviceクラスを呼び出すことができます。
+Helperクラス内ではViewテンプレート内と同様に`$model`オブジェクトからModelクラス、Serviceクラスを呼び出すことができます。  
 Helperクラスのメソッドは`$helper`オブジェクトにより呼び出します。
 
 ```php
 $helper->method();
 ```
 
-メソッド呼び出しにより、Viewテンプレートで必要なロジックを実行します。
+メソッド呼び出しにより、Viewテンプレートで必要なロジックを実行します。  
 メソッドの戻り値はViewテンプレートに描画されますが、<a href="#template_keyword">Viewテンプレート構文</a>によりエスケープして出力し、安全な値として出力する必要があります。
 
 ```php
@@ -537,10 +538,10 @@ Helper    |SampleHelper    |app/helpers/SampleHelper.php
 
 エンティティマッピングで使用するエンティティクラスや外部APIを利用するためのクラスなどはここに定義します。
 
-##[ルーティング定義](#routing)
-###routes.php
-ルーティング設定により、URI設計を行うことができます。ルーティングにはmod_rewiteが必要です。
-ルーティング定義は`config/routes.php`に記述します。  
+## [ルーティング定義](#routing)
+### routes.php
+ルーティング設定により、URI設計を行うことができます。ルーティングにはmod_rewiteが必要です。  
+ルーティング定義は`config/routes.php`に記述します。
 
 ```php
 namespace WebStream\Router;
@@ -552,7 +553,7 @@ Router::setRule([
 
 ルーティングルールは配列で定義し、キーにURIパス定義、バリューにクラス、アクション定義を記述します。誤った定義が記述された場合、例外が発生します。
 
-###URIパス定義
+### URIパス定義
 URIパスは`/path/to`形式で定義します。またURIには変数の設定が可能で、`:value`形式で記述します。例えば、`/blog/:id`と定義し、`/blog/10`にアクセスした場合、Controllerクラスでは以下の方法で値を取得出来ます。
 
 ```php
@@ -565,7 +566,7 @@ class BlogController extends CoreController {
 }
 ```
 
-##[バリデーション定義](#validate)
+## [バリデーション定義](#validate)
 Controllerクラスのアクションメソッドに`@Validate`アノテーションを記述することでバリデーションを有効にできます。
 
 ```php
@@ -601,7 +602,7 @@ range[n..m]  |範囲チェック(整数)
 regexp[//]   |正規表現チェック
 
 ### カスタムバリデーション
-用意されているバリデーションルール以外に、開発者が独自にルールを定義することが出来ます。
+用意されているバリデーションルール以外に、開発者が独自にルールを定義することが出来ます。  
 `app`ディレクトリ配下の任意の場所にバリデーションクラスを作成します。
 
 ```php
@@ -617,9 +618,9 @@ class Page implements IValidate
 }
 ```
 
-`WebStream\Validate\Rule\IValidate`インタフェースを実装し、戻り値が`bool`型の`isValid`メソッドを実装します。
-バリデーションが成功すればtrue、失敗すればfalseを返すようにします。
-クラス名がルール名と紐付いているので、`@Validate`アノテーションに指定します。
+`WebStream\Validate\Rule\IValidate`インタフェースを実装し、戻り値が`bool`型の`isValid`メソッドを実装します。  
+バリデーションが成功すればtrue、失敗すればfalseを返すようにします。  
+クラス名がルール名と紐付いているので、`@Validate`アノテーションに指定します。  
 ただし、ルール名はクラス名をスネークケースに変換したものになります。
 
 ```php
@@ -636,8 +637,8 @@ class BlogController extends CoreController {
 }
 ```
 
-##[リクエストパラメータ](#request)
-GET/POST/PUT/DELETEで送信した値をControllerで取得できます。
+## [リクエストパラメータ](#request)
+GET/POST/PUT/DELETEで送信した値をControllerで取得できます。  
 `$this->request`オブジェクトからリクエストパラメータを取得でき、`get`,`post`,`put`,`delete`メソッドにそれぞれアクセスします。
 
 ```php
@@ -651,7 +652,7 @@ class BlogController extends CoreController {
 }
 ```
 
-##[セッション](#session)
+## [セッション](#session)
 ログイン処理などを実装するときに、セッション管理を使用しますが、WebStreamでは`$this->session`オブジェクトを使用します。セッション期限を指定するには`restart`メソッドを使用します。
 
 ```php
@@ -669,8 +670,8 @@ class LoginController extends CoreController {
 
 セッションがタイムアウトした場合、`SessionTimeoutException`が発生します。
 
-##<a href="annotaion">アノテーション</a>
-ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。
+## <a href="annotaion">アノテーション</a>
+ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。  
 クラスまたはメソッドに対するアノテーションは`@Inject`、プロパティに対するアノテーションは`@Autowired`の指定が必須です。
 
 
@@ -702,8 +703,8 @@ ControllerとModelではアノテーションを使ってクラスやメソッ�
 用意されているアノテーション(デフォルトアノテーション)以外に独自のカスタムアノテーションを定義することができます。
 
 ####定義方法
-`app`ディレクトリ以下の任意の場所にクラスを定義します。定義したクラスは自動的にクラスパスが通ります。
-クラスの定義は以下のルールに従って定義してください。  
+`app`ディレクトリ以下の任意の場所にクラスを定義します。定義したクラスは自動的にクラスパスが通ります。  
+クラスの定義は以下のルールに従って定義してください。
 
 No |ルール                                      |内容                                                       |必須かどうか
 ---|-------------------------------------------|-----------------------------------------------------------|-------------------
