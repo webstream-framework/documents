@@ -671,7 +671,34 @@ class LoginController extends CoreController {
 セッションがタイムアウトした場合、`SessionTimeoutException`が発生します。
 
 ## [ロギング](#logging)
-Controller、Service、Model、Helperクラスではロガーを使用できます。  
+`config/log.ini`または`config/log.yml`を配置し、ログ設定を記述します。  
+ログ格納ディレクトリには書き込み権限を与えておく必要があります。  
+
+```
+; プロジェクトルートからの相対パスまたは絶対パス
+path = log/webstream.log
+; ログレベル
+level = debug
+; ログローテート設定(day|month|year)
+rotate_cycle = day
+; ログローテート設定(サイズ:Byte)
+rotate_size = 1024
+; ログに表示するアプリケーション名
+applicationName = webstream
+; ログフォーマット設定
+; 設定しない場合はデフォルト設定になる
+; %c ログに表示するアプリケーション名
+: %d 日付(%Y-%m-%d %H:%M)
+; %d{(指定フォーマット)} 日付 例：%d{%Y-%m-%d %H:%M.%f}
+; %l ログレベル(小文字)
+; %L ログレベル(大文字)
+; 表示幅指定 例：%5L → [INFO ]、[DEBUG]など
+;   表示幅指定は%c、%l、%L、%dに適用可
+; %m ログメッセージ
+format = [%c][%d{%Y-%m-%d %H:%M:%S.%f}][%5L] %m
+```
+
+Controller、Service、Model、Helperクラスでロガーを使用できます。  
 
 ```php
 namespace MyBlog;
@@ -689,18 +716,22 @@ class LoginController extends CoreController {
 ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。  
 クラスまたはメソッドに対するアノテーションは`@Inject`、プロパティに対するアノテーションは`@Autowired`の指定が必須です。
 
+アノテーションを適用するクラスは`IAnnotatable`を実装する必要があります。  
+例えば`app/libraries/`に独自で定義したクラスには開発者が`IAnnotatable`を実装しないと、アノテーションが有効になりません。  
+なお、Controller、Service、Model、Helperの各クラスはデフォルトで実装されているため改めて開発者が実装する必要はありません。
 
 アノテーション|説明
 -----------|----
 @Inject    |メソッドに対するアノテーションを有効にする
 
-####すべてのレイヤで使用可能なアノテーション
+#### すべてのレイヤで使用可能なアノテーション
 アノテーション      |説明                                         |サンプル
 -----------------|---------------------------------------------|------
 @Autowired       |プロパティに対するアノテーションを有効にする         |@Autowired(value="hoge")<br>@Autowired(type="\Hoge")
+@Alias           |指定されたメソッド名で受けてアノテーションが定義されたメソッドへ転送する |@Alias(name="aliasMethod")
 @Filter          |メソッドが呼ばれる前または後に任意の処理を実行する    |@Filter(type="before")<br>@Filter(type="after")<br>@Filter(type="before" except="method1")<br>@Filter(type="before" only="method2")<br>@Filter(type="before",only="method1",except="method2")<br>@Filter(type="after",except={"method1","method2"})
 
-####Controllerで使用可能なアノテーション
+#### Controllerで使用可能なアノテーション
 アノテーション     |説明                                         |サンプル
 -----------------|---------------------------------------------|------
 @Header          |リクエスト/レスポンスを制御する                       |@Header(contentType="html")<br>@Header(contentType="xml")<br>@Header(allowMethod="POST")<br>@Header(allowMethod={"GET","POST"})
@@ -708,16 +739,16 @@ ControllerとModelではアノテーションを使ってクラスやメソッ�
 @ExceptionHandler|例外を補足して別処理を実行する                     |@ExceptionHandler("\Exception")<br>@ExceptionHandler({"\RuntimeException","\LogicException"})
 @CsrfProtection  |CSRF対策処理を実行する                          |@CsrfProtection
 
-####Modelで使用可能なアノテーション
+#### Modelで使用可能なアノテーション
 アノテーション |説明                                 |サンプル
 -------------|------------------------------------|---------------------------------------------------------------------------------------
 @Database    |Modelクラスに対してデータベース設定をする|@Database(driver="WebStream\Database\Driver\Mysql", config="config/database.mysql.ini")
 @Query       |読み込むクエリファイルを指定する         |@Query(file="query/blog_query.xml")
 
-###カスタムアノテーション
+### カスタムアノテーション
 用意されているアノテーション(デフォルトアノテーション)以外に独自のカスタムアノテーションを定義することができます。
 
-####定義方法
+#### 定義方法
 `app`ディレクトリ以下の任意の場所にクラスを定義します。定義したクラスは自動的にクラスパスが通ります。  
 クラスの定義は以下のルールに従って定義してください。
 
