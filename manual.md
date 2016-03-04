@@ -671,6 +671,7 @@ class LoginController extends CoreController {
 セッションがタイムアウトした場合、`SessionTimeoutException`が発生します。
 
 ## [ロギング](#logging)
+### ログ設定
 `config/log.ini`または`config/log.yml`を配置し、ログ設定を記述します。  
 ログ格納ディレクトリには書き込み権限を与えておく必要があります。  
 
@@ -711,6 +712,44 @@ class LoginController extends CoreController {
 ```
 
 ログレベルについては、[PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)に準拠しています。
+
+### ロガーのカスタマイズ
+デフォルトではロガーはログファイル出力しますが、Outputterを切り替えることで出力先を変更することができます。  
+ロガーインスタンスを新たに生成し、Outputterを差し替えます。
+
+```
+$instance = Logger::getInstance();
+$instance->setOutputter([
+   new BrowserOutputter()
+]);
+$customLogger = new LoggerAdapter($instance);
+```
+
+WebStream標準では以下のOutputterが用意してあります。独自に定義すれば出力先を自由に変えることができます。  
+
+| Outputter種類    | 出力先                     |
+|------------------|----------------------------|
+| FileOutputter    | 指定したログファイルに出力 |
+| BrowserOutputter | ブラウザに出力             |
+| ConsoleOutputter | コンソールに出力           |
+
+
+## [ファイル入出力](#io)
+PHP標準の`file`、`file_get_contents`、`file_put_contents`などを使うとファイル入出力ができますが、WebStreamでは安全にファイル入出力を行うためのクラスが用意してあります。  
+
+| クラス           | 内容                                                                                                       |
+|------------------|------------------------------------------------------------------------------------------------------------|
+| FileReader       | ファイル読み込みを行う<br>ファイルはロックしない                                                           |
+| FileWriter       | ファイル書き込みを行う<br>書き込み時に排他ロックを取得する<br>ファイルを閉じるまでロックし続ける           |
+| SimpleFileWriter | ファイル書き込みを行う<br>書き込み時に排他ロックを取得する<br>書き込む度にファイルを閉じてロックを解放する |
+
+これらのクラスはファイルの読み込みや書き込みになんらかの問題が発生した場合、`IOException`をスローするので、適切に例外処理することができます。  
+さらに以下のクラスを使うことで、ファイルオブジェクトを取得することができます。それにより、さらに高度なファイル処理が可能になります。  
+
+| クラス             | 内容                                               |
+|--------------------|----------------------------------------------------|
+| InputStreamReader  | ファイル読み込みを行う<br>入力ストリームを操作可能 |
+| OutputstreamWriter | ファイル書き込みを行う<br>出力ストリームを操作可能 |
 
 ## [アノテーション](#annotation)
 ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。  
