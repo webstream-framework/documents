@@ -23,9 +23,13 @@ Serviceクラス、Modelクラスは以下のように呼び出します。
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
-class BlogController extends CoreController {
-    public funciton execute() {
+
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         // $this->{ページ名}->(Service|Modelクラスのメソッド)
         $this->Blog->entry();
     }
@@ -42,14 +46,16 @@ HTMLを描画するにはControllerからViewテンプレートを呼び出し�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
 /**
- * @Inject
  * @Template("index.tmpl")
  */
-class BlogController extends CoreController {
-    public funciton execute() {
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         // $this->{ページ名}->(Service|Modelクラスのメソッド)
         $this->Blog->entry();
     }
@@ -68,9 +74,13 @@ ServiceクラスではContollerクラスから受け取ったリクエストや�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreService;
-class BlogService extends CoreService {
-    public funciton entry() {
+
+class BlogService extends CoreService
+{
+    public funciton entry()
+    {
         // $this->{ページ名}->(Modelクラスのメソッド)
         $this->Blog->getEntryData();
     }
@@ -86,15 +96,16 @@ Viewから参照するデータはServiceクラスのGetterメソッドを経由
 Serviceクラスの中で、未定義のプロパティに値をセットすると、PropertyProxyにより、Serviceクラス内で値が保持されます。保持されたデータはViewから参照可能になります。
 これにより、Viewから参照するデータをGetterメソッドなしで参照でき、カプセル化した状態で値を保持することができます。
 
-
 **PropertyProxyを使わない場合**
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreService;
 
 // PropertyProxyなしの場合、Getterメソッドが必要
-class BlogService extends CoreService {
+class BlogService extends CoreService
+{
     // プロパティはpublicにすべきではない
     private $title;
 
@@ -104,7 +115,8 @@ class BlogService extends CoreService {
         return $this->title;
     }
 
-    public funciton entry() {
+    public funciton entry()
+    {
         $this->title = "マイブログ";
     }
 }
@@ -128,11 +140,14 @@ class BlogService extends CoreService {
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreService;
 
 // PropertyProxy使用の場合、Getterメソッドは不要
-class BlogService extends CoreService {
-    public funciton entry() {
+class BlogService extends CoreService
+{
+    public funciton entry()
+    {
         $this->title = "マイブログ";
     }
 }
@@ -161,13 +176,16 @@ Serviceクラスが定義されない場合はController、Viewから直接呼�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreModel;
+
 /**
- * @Inject
  * @Database(driver="WebStream\Database\Driver\Mysql", config="config/database.mysql.ini")
  */
-class BlogModel extends CoreModel {
-    public funciton getEntryData() {
+class BlogModel extends CoreModel
+{
+    public funciton getEntryData()
+    {
         $sql = "SELECT * FROM T_Blog";
         return $this->select($sql);
     }
@@ -180,13 +198,16 @@ class BlogModel extends CoreModel {
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreModel;
+
 /**
- * @Inject
  * @Database(driver="WebStream\Database\Driver\Mysql", config="config/database.mysql.ini")
  */
-class BlogModel extends CoreModel {
-    public funciton getEntryData() {
+class BlogModel extends CoreModel
+{
+    public funciton getEntryData()
+    {
         $sql = "SELECT * FROM T_Blog WHERE id = :id";
         $bind = ["id" => 10];
         return $this->select($sql, $bind);
@@ -233,17 +254,19 @@ mapperタグ配下にSQLを記述するタグを記述します。`<select>`、`
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreModel;
+
 /**
- * @Inject
  * @Database(driver="WebStream\Database\Driver\Mysql", config="config/database.mysql.ini")
  */
-class BlogModel extends CoreModel {
+class BlogModel extends CoreModel
+{
     /**
-     * @Inject
      * @Query(file="query/myblog.xml")
      */
-    public funciton getEntryData() {
+    public funciton getEntryData()
+    {
         $bind = ["id" => 10];
         return $this->getData($bind);
     }
@@ -270,15 +293,19 @@ Modelクラスでは直接SQLをメソッド内に記述する以外に、クエ
 
 ```php
 namespace MyBlog\Entity;
-class BlogEntity {
+
+class BlogEntity
+{
     private $title;
     private $description;
 
-    public funciton getTitle() {
+    public funciton getTitle()
+    {
         return $this->title;
     }
 
-    public funciton getDescription() {
+    public funciton getDescription()
+    {
         return $this->description;
     }
 }
@@ -331,15 +358,17 @@ ContollerクラスからViewテンプレートを呼び出します。`@Template
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
 /**
  * テンプレートを呼び出す。
- * @Inject
  * @Template("index.tmpl")
  */
-class BlogController extends CoreController {
-    public funciton execute() {
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         $this->Blog->entry();
     }
 }
@@ -352,15 +381,17 @@ class BlogController extends CoreController {
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
 /**
  * 基本テンプレートと共通テンプレートを呼び出す。
- * @Inject
  * @Template("index.tmpl")
  */
-class BlogController extends CoreController {
-    public funciton execute() {
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         $this->Blog->entry();
     }
 }
@@ -389,15 +420,17 @@ ViewテンプレートにはHTMLを記述しますが、Service/Modelの値な�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
 /**
  * Basicテンプレートを使用する
- * @Inject
  * @Template("index.tmpl", engine="basic")
  */
-class BlogController extends CoreController {
-    public funciton execute() {
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         $this->Blog->entry();
     }
 }
@@ -405,15 +438,17 @@ class BlogController extends CoreController {
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
 /**
  * Twigテンプレートを使用する
- * @Inject
  * @Template("index.tmpl", engine="twig")
  */
-class BlogController extends CoreController {
-    public funciton execute() {
+class BlogController extends CoreController
+{
+    public funciton execute()
+    {
         $this->Blog->entry();
     }
 }
@@ -440,14 +475,16 @@ Basicテンプレートを指定している場合に`<form>`タグが含まれ�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
-class BlogController extends CoreController {
+class BlogController extends CoreController
+{
     /**
-     * @Inject
      * @CsrfProtection
      */
-    public funciton formRegister() {
+    public funciton formRegister()
+    {
         // CSRFエラーがあった場合、例外が発生し、ここには到達しない
     }
 }
@@ -459,15 +496,17 @@ CSRF対策トークンの送信はPOSTで通常行いますが、HTTPヘッダ`X
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 
-class BlogController extends CoreController {
+class BlogController extends CoreController
+{
     /**
      * テンプレートキャッシュを600秒有効にする例
-     * @Inject
      * @Template("index.tmpl", engine="basic", cacheTime=600)
      */
-    public funciton execute() {
+    public funciton execute()
+    {
         $this->Blog->entry();
     }
 }
@@ -539,28 +578,29 @@ Helper    |SampleHelper    |app/helpers/SampleHelper.php
 エンティティマッピングで使用するエンティティクラスや外部APIを利用するためのクラスなどはここに定義します。
 
 ## [ルーティング定義](#routing)
-### routes.php
+### routes.yml
 ルーティング設定により、URI設計を行うことができます。ルーティングにはmod_rewiteが必要です。  
-ルーティング定義は`config/routes.php`に記述します。
+ルーティング定義は`config/routes.yml`に記述します。
 
-```php
-namespace WebStream\Router;
-Router::setRule([
-    '/login' => 'sample#login'
-    '/blog/:id' => 'blog#entry'
-]);
+```yml
+'/login': 'sample#login'
+'/blog/:id': 'blog#entry'
 ```
 
-ルーティングルールは配列で定義し、キーにURIパス定義、バリューにクラス、アクション定義を記述します。誤った定義が記述された場合、例外が発生します。
+キーにURIパス定義、バリューにクラス、アクション定義を記述します。誤った定義が記述された場合、例外が発生します。
 
 ### URIパス定義
 URIパスは`/path/to`形式で定義します。またURIには変数の設定が可能で、`:value`形式で記述します。例えば、`/blog/:id`と定義し、`/blog/10`にアクセスした場合、Controllerクラスでは以下の方法で値を取得出来ます。
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
-class BlogController extends CoreController {
-    public function execute(array $params) {
+
+class BlogController extends CoreController
+{
+    public function execute(array $params)
+    {
         $id = $params['id']; // 10
     }
 }
@@ -573,13 +613,14 @@ Controllerクラスのアクションメソッドに`@Validate`アノテーシ�
 namespace MyBlog;
 use WebStream\Core\CoreController;
 use WebSteram\Annotation\Validate;
-class BlogController extends CoreController {
+class BlogController extends CoreController
+{
     /**
      * GETリクエストのtestパラメータの指定がない場合、エラーになる例
-     * @Inject
      * @Validate(key="test", rule="required", method="get")
      */
-    public function execute() {
+    public function execute()
+    {
     }
 }
 ```
@@ -606,9 +647,10 @@ regexp[//]   |正規表現チェック
 `app`ディレクトリ配下の任意の場所にバリデーションクラスを作成します。
 
 ```php
-<?php
 namespace Blog;
+
 use WebStream\Validate\Rule\IValidate;
+
 class Page implements IValidate
 {
     public function isValid($value, $rule)
@@ -625,14 +667,17 @@ class Page implements IValidate
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 use WebSteram\Annotation\Validate;
-class BlogController extends CoreController {
+
+class BlogController extends CoreController
+{
     /**
-     * @Inject
      * @Validate(key="p", rule="page", method="get")
      */
-    public function execute() {
+    public function execute()
+    {
     }
 }
 ```
@@ -643,9 +688,13 @@ GET/POST/PUT/DELETEで送信した値をControllerで取得できます。
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
-class BlogController extends CoreController {
-    public function execute() {
+
+class BlogController extends CoreController
+{
+    public function execute()
+    {
         $getParams = $this->request->get(); // GETパラメータすべて取得
         $getParam  = $this->request->get("name");
     }
@@ -657,9 +706,13 @@ class BlogController extends CoreController {
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
-class LoginController extends CoreController {
-    public function execute() {
+
+class LoginController extends CoreController
+{
+    public function execute()
+    {
         $expire = 6000; // 10分
         $path = "/login";
         $domain = ".mydomain.com";
@@ -703,9 +756,13 @@ Controller、Service、Model、Helperクラスでロガーを使用できます�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
-class LoginController extends CoreController {
-    public function index() {
+
+class LoginController extends CoreController
+{
+    public function index()
+    {
         $this->logger->debug("logging in controller");
     }
 }
@@ -733,6 +790,9 @@ WebStream標準では以下のOutputterが用意してあります。独自に�
 | BrowserOutputter | ブラウザに出力             |
 | ConsoleOutputter | コンソールに出力           |
 
+### ログの遅延書き込み機能
+APCuキャッシュが有効になっている場合、ログは一旦キャッシュに保存され、すべての処理終了後にまとめてログファイルに出力されます。  
+APCuキャッシュが使用不可の場合は、ログファイルに即時書き込みにいくため、パフォーマンス上あらかじめAPCuキャッシュをインストールしておくことを推奨します。
 
 ## [ファイル入出力](#io)
 PHP標準の`file`、`file_get_contents`、`file_put_contents`などを使うとファイル入出力ができますが、WebStreamでは安全にファイル入出力を行うためのクラスが用意してあります。  
@@ -753,15 +813,10 @@ PHP標準の`file`、`file_get_contents`、`file_put_contents`などを使うと
 
 ## [アノテーション](#annotation)
 ControllerとModelではアノテーションを使ってクラスやメソッドを操作することができます。アノテーションを利用することで便利な処理が可能になります。  
-クラスまたはメソッドに対するアノテーションは`@Inject`、プロパティに対するアノテーションは`@Autowired`の指定が必須です。
 
 アノテーションを適用するクラスは`IAnnotatable`を実装する必要があります。  
 例えば`app/libraries/`に独自で定義したクラスには開発者が`IAnnotatable`を実装しないと、アノテーションが有効になりません。  
 なお、Controller、Service、Model、Helperの各クラスはデフォルトで実装されているため改めて開発者が実装する必要はありません。
-
-アノテーション|説明
------------|----
-@Inject    |メソッドに対するアノテーションを有効にする
 
 #### すべてのレイヤで使用可能なアノテーション
 アノテーション      |説明                                         |サンプル
