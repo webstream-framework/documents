@@ -49,11 +49,11 @@ namespace MyBlog;
 
 use WebStream\Core\CoreController;
 
-/**
- * @Template("index.tmpl")
- */
 class BlogController extends CoreController
 {
+    /**
+     * @Template("index.tmpl")
+     */
     public funciton execute()
     {
         // $this->{ページ名}->(Service|Modelクラスのメソッド)
@@ -224,7 +224,7 @@ select(string $sql)<br>select(string $sql, array $bind)|SELECTを実行する。
 insert(string $sql, array $bind)                       |INSERTを実行する。
 update(string $sql, array $bind)                       |UPDATEを実行する。
 delete(string $sql)<br>delete(string $sql, array $bind)|DELETEを実行する。
-beginTransation()                                      |トランザクションを開始する。
+beginTransation(int $isolationLevel = 2)               |トランザクションを開始する。
 commit()                                               |コミットする。
 rollback()                                             |ロールバックする。
 connect()                                              |DBに接続する。
@@ -342,7 +342,9 @@ $this->getData($bind)->toEntity($entityClasspath);
 #### トランザクション処理
 `$this->beginTransation()`でトランザクションを開始し`$this->commit()`でコミット、`$this->rollback()`でロールバックを実行します。  
 ただし、DBMSがトランザクション処理に対応していない場合はトランザクション処理は有効になりません。  
-なお、トランザクション処理を明示しない場合、処理が終了後、自動的にコミットを実行します。
+なお、トランザクション処理を明示しない場合、処理が終了後、自動的にコミットを実行します。  
+`$this->beginTransation()`はトランザクション分離レベルを引数として指定できます。  
+指定可能なトランザクション分離レベルは`Doctrine\DBAL\Connection`に定義されている値となります。
 
 ## [View](#view)
 Viewは画面に出力するHTMLなどを描画し、Controllerクラスから呼ばれます。HTML等の描画はWebStream独自のテンプレート機能を利用します。  
