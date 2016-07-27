@@ -613,8 +613,10 @@ Controllerクラスのアクションメソッドに`@Validate`アノテーシ�
 
 ```php
 namespace MyBlog;
+
 use WebStream\Core\CoreController;
 use WebSteram\Annotation\Validate;
+
 class BlogController extends CoreController
 {
     /**
@@ -725,6 +727,59 @@ class LoginController extends CoreController
 
 セッションがタイムアウトした場合、`SessionTimeoutException`が発生します。
 
+## [キャッシュ](#cache)
+キャッシュ機能を使うことができます。使用できるキャッシュライブラリは以下のとおりです。
+
+| クラス        | 出力先                       | 設定方法                                           |
+|---------------|------------------------------|----------------------------------------------------|
+| Apcu          | APCuキャッシュを使用する     | APCuをインストールする                             |
+| Memcached     | memcachedを使用する          | memcachedをインストールする config/cache.ymlに設定 |
+| Redis         | redisを使用する              | redisをインストールする config/cache.ymlに設定     |
+| TemporaryFile | ファイルキャッシュを使用する | 利用時に出力先を指定する                           |
+
+キャッシュは`CacheDriverFactory`クラスを使うことで簡単に使用できます。  
+
+```php
+use WebStream\Module\Container;
+use WebStream\Cache\Driver\CacheDriverFactory;
+
+$factory = new CacheDriverFactory();
+$config = new Container(false);
+$config->cachePrefix = "test_cache";
+$cache = $factory->create("WebStream\Cache\Driver\Apcu", $config);
+$cache->inject('logger', $this->logger);
+
+$cache->add("key", "value");
+$value = $cache->get("key");
+```
+
+さらに簡単に使うためのUtilityが用意されているので、それを使うとより簡潔に書くことができます。  
+
+```php
+use WebStream\Module\Utility\CacheUtils;
+
+$cache = $this->getCacheDriver("apcu", "test_cache");
+$cache->inject('logger', $this->logger);
+
+$cache->add("key", "value");
+$value = $cache->get("key");
+```
+
+キャッシュライブラリとして使う場合の接続先情報は`config/cache.yml`に設定を書く必要があります。  
+`cache.yml`のサンプルは以下のとおりです。
+
+```yml
+---
+  memcached:
+    host: 192.168.1.100
+    port: 11211
+  redis:
+    host: 192.168.1.100
+    port: 6379
+  temporaryfile:
+    path: "/tmp"
+```
+
 ## [ロギング](#logging)
 ### ログ設定
 `config/log.ini`または`config/log.yml`を配置し、ログ設定を記述します。  
@@ -793,8 +848,9 @@ WebStream標準では以下のOutputterが用意してあります。独自に�
 | ConsoleOutputter | コンソールに出力           |
 
 ### ログの遅延書き込み機能
-APCuキャッシュが有効になっている場合、ログは一旦キャッシュに保存され、すべての処理終了後にまとめてログファイルに出力されます。  
-APCuキャッシュが使用不可の場合は、ログファイルに即時書き込みにいくため、パフォーマンス上あらかじめAPCuキャッシュをインストールしておくことを推奨します。
+キャッシュ機能が有効になっている場合、ログは一旦キャッシュに保存され、すべての処理終了後にまとめてログファイルに出力されます。  
+キャッシュは`APCu`、`Memcached`、`Redis`のいずれかが使用可能です(デフォルトはAPCu)。  
+これらのキャッシュライブラリが使用不可の場合はキャッシュせず即時ログ出力を行いますが、パフォーマンス上あらかじめキャッシュライブラリをインストールしておくことを推奨します。
 
 ## [ファイル入出力](#io)
 PHP標準の`file`、`file_get_contents`、`file_put_contents`などを使うとファイル入出力ができますが、WebStreamでは安全にファイル入出力を行うためのクラスが用意してあります。  
